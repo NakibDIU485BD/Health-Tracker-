@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Tracker — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     AUTH SCREEN
+══════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-bg">
+    <div class="auth-orb o1"></div>
+    <div class="auth-orb o2"></div>
+    <div class="auth-orb o3"></div>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <div class="auth-card" id="login-card">
+    <div class="auth-logo">
+      <div class="logo-icon">💚</div>
+      <div class="logo-text">Health <span>Tracker</span></div>
+    </div>
+    <div class="auth-title">Welcome back</div>
+    <div class="auth-sub">Sign in to continue your health journey</div>
+    <div class="msg-box" id="login-msg"></div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+    <div class="auth-switch">Don't have an account? <a onclick="showRegister()">Create one free</a></div>
+  </div>
+
+  <!-- REGISTER FORM -->
+  <div class="auth-card" id="register-card" style="display:none">
+    <div class="auth-logo">
+      <div class="logo-icon">💚</div>
+      <div class="logo-text">Health <span>Tracker</span></div>
+    </div>
+    <div class="auth-title">Start tracking</div>
+    <div class="auth-sub">Create your free health account</div>
+    <div class="msg-box" id="reg-msg"></div>
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="reg-name" placeholder="Alex Johnson" autocomplete="name">
+    </div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="reg-pass" placeholder="Min 8 chars" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label>Confirm</label>
+        <input type="password" id="reg-pass2" placeholder="Repeat" autocomplete="new-password">
+      </div>
+    </div>
+    <button class="btn-primary" onclick="doRegister()">Create Account →</button>
+    <div class="auth-switch">Already have an account? <a onclick="showLogin()">Sign in</a></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN APP SHELL
+══════════════════════════════════════ -->
+<div id="app">
+
+  <!-- Mobile Top Bar -->
+  <div class="mobile-bar">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="auth-logo" style="margin:0">
+      <div class="logo-icon" style="width:28px;height:28px;font-size:14px;border-radius:7px">💚</div>
+      <div class="logo-text" style="font-size:16px">Health <span>Tracker</span></div>
+    </div>
+    <button class="btn-add" style="width:auto;padding:8px 14px;font-size:12px" onclick="openModal()">+ Add</button>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">💚</div>
+      <div class="logo-text">Health <span>Tracker</span></div>
+    </div>
+
+    <div class="nav-section-label">Main</div>
+    <div class="nav-item active" id="nav-dashboard" onclick="showSection('dashboard',this)">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" id="nav-history" onclick="showSection('history',this)">
+      <span class="icon">📅</span> History
+    </div>
+    <div class="nav-item" id="nav-profile" onclick="showSection('profile',this)">
+      <span class="icon">👤</span> Profile
+    </div>
+
+    <div class="nav-section-label">Advanced</div>
+    <div class="nav-item" id="nav-advanced" onclick="showSection('advanced',this)">
+      <span class="icon">🏥</span> Advanced Health
+    </div>
+    <div class="nav-item" id="nav-reports" onclick="showSection('reports',this)">
+      <span class="icon">📈</span> Reports
+    </div>
+
+    <div class="nav-section-label">Insights</div>
+    <div class="nav-item" id="nav-alerts" onclick="showSection('alerts',this)">
+      <span class="icon">🔔</span> Health Alerts
+      <span class="nav-badge" id="alerts-badge" style="display:none">0</span>
+    </div>
+    <div class="nav-item" id="nav-achievements" onclick="showSection('achievements',this)">
+      <span class="icon">🏆</span> Achievements
+    </div>
+
+    <div class="nav-section-label">Tools</div>
+    <div class="nav-item" onclick="openModal()">
+      <span class="icon">➕</span> Log Entry
+    </div>
+    <div class="nav-item" onclick="openBMICalc()">
+      <span class="icon">🧮</span> BMI Calculator
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sidebar-avatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-name">Loading…</div>
+          <div class="user-role">Health Member</div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()" title="Logout">⇥</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════════
+       MAIN CONTENT
+  ══════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- ─────────────────────────────────────
+         DASHBOARD
+    ───────────────────────────────────── -->
+    <div class="section active" id="section-dashboard">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1>Dashboard <span id="greeting-emoji">🌿</span></h1>
+          <p id="greeting-text">Track your wellness journey</p>
+        </div>
+        <div class="topbar-right">
+          <button class="btn-secondary" onclick="openBMICalc()">🧮 BMI Calc</button>
+          <button class="btn-add" onclick="openModal()">+ Log Entry</button>
+        </div>
+      </div>
+
+      <!-- AI Suggestions Banner -->
+      <div id="ai-suggestions-banner" style="display:none;margin-bottom:20px"></div>
+
+      <!-- Metric Cards -->
+      <div class="metrics-grid">
+        <div class="metric-card weight">
+          <div class="metric-icon">⚖️</div>
+          <div class="metric-label">Current Weight</div>
+          <div class="metric-value"><span id="m-weight">--</span><span class="metric-unit">kg</span></div>
+          <div class="metric-sub" id="m-weight-sub">No data yet</div>
+        </div>
+        <div class="metric-card bmi">
+          <div class="metric-icon">📐</div>
+          <div class="metric-label">BMI Index</div>
+          <div class="metric-value"><span id="m-bmi">--</span></div>
+          <div class="metric-sub" id="m-bmi-sub">No data yet</div>
+        </div>
+        <div class="metric-card steps">
+          <div class="metric-icon">👟</div>
+          <div class="metric-label">Daily Steps</div>
+          <div class="metric-value"><span id="m-steps">--</span></div>
+          <div class="metric-sub" id="m-steps-sub">Goal: 10,000</div>
+        </div>
+        <div class="metric-card water">
+          <div class="metric-icon">💧</div>
+          <div class="metric-label">Water Intake</div>
+          <div class="metric-value"><span id="m-water">--</span><span class="metric-unit">L</span></div>
+          <div class="metric-sub" id="m-water-sub">Goal: 2.5L</div>
+        </div>
+      </div>
+
+      <!-- Chart + Goals -->
+      <div class="content-row">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Weight Progress</span>
+            <span style="font-size:12px;color:var(--muted)">Last 7 entries</span>
+          </div>
+          <div class="panel-body">
+            <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Today's Goals</span>
+          </div>
+          <div class="panel-body">
+            <div class="goals-list">
+              <div class="goal-item">
+                <div class="goal-top"><span class="goal-name">👟 Steps</span><span class="goal-pct" id="g-steps-pct">0%</span></div>
+                <div class="goal-bar"><div class="goal-fill fill-blue" id="g-steps-bar" style="width:0%"></div></div>
+              </div>
+              <div class="goal-item">
+                <div class="goal-top"><span class="goal-name">💧 Water</span><span class="goal-pct" id="g-water-pct">0%</span></div>
+                <div class="goal-bar"><div class="goal-fill fill-amber" id="g-water-bar" style="width:0%"></div></div>
+              </div>
+              <div class="goal-item">
+                <div class="goal-top"><span class="goal-name">📊 Entries</span><span class="goal-pct" id="g-entries-pct">0%</span></div>
+                <div class="goal-bar"><div class="goal-fill fill-green" id="g-entries-bar" style="width:0%"></div></div>
+              </div>
+            </div>
+
+            <div style="margin-top:24px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <div class="panel-title" style="font-size:13px">💧 Smart Water Tracker</div>
+                <span style="font-size:11px;color:var(--sage)" id="water-goal-label">Goal: 2.5L</span>
+              </div>
+              <div class="water-visual" id="water-cups"></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:8px">Click cups to toggle • Each = 250ml</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Table -->
+      <div class="table-panel">
+        <div class="panel-header">
+          <span class="panel-title">Recent Records</span>
+          <span onclick="showSection('history', document.getElementById('nav-history'))" style="font-size:12px;color:var(--sage);cursor:pointer">View all →</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Weight</th><th>Height</th><th>BMI</th><th>Steps</th><th>Water</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="recent-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────
+         HISTORY
+    ───────────────────────────────────── -->
+    <div class="section" id="section-history">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1>Health History 📅</h1>
+          <p>All your recorded wellness data</p>
+        </div>
+        <div class="topbar-right">
+          <button class="btn-add" onclick="openModal()">+ Log Entry</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:20px">
+        <div class="panel-body">
+          <div class="chart-wrap" style="height:260px"><canvas id="historyChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="table-panel">
+        <div class="panel-header">
+          <span class="panel-title">All Records</span>
+          <span id="total-records" style="font-size:12px;color:var(--muted)">0 entries</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Weight</th><th>Height</th><th>BMI</th><th>Steps</th><th>Water</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="history-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────
+         PROFILE
+    ───────────────────────────────────── -->
+    <div class="section" id="section-profile">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1>Profile 👤</h1>
+          <p>Manage your account &amp; health goals</p>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <div class="profile-card">
+          <div class="profile-avatar-large" id="profile-avatar-lg">A</div>
+          <div class="panel-title" id="profile-name-display">Name</div>
+          <div style="color:var(--muted);font-size:13px;margin-top:4px;margin-bottom:24px" id="profile-email-display">email</div>
+
+          <div class="form-group"><label>Full Name</label><input type="text" id="prof-name" placeholder="Your name"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="prof-email" disabled style="opacity:0.5;cursor:not-allowed"></div>
+
+          <div class="form-row">
+            <div class="form-group"><label>Age</label><input type="number" id="prof-age" placeholder="25" min="10" max="120"></div>
+            <div class="form-group">
+              <label>Gender</label>
+              <select id="prof-gender">
+                <option value="">Select…</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Default Height (cm)</label><input type="number" id="prof-height" placeholder="175" min="100" max="250"></div>
+            <div class="form-group">
+              <label>Health Goal</label>
+              <select id="prof-goal">
+                <option value="maintain">Maintain Weight</option>
+                <option value="loss">Lose Weight</option>
+                <option value="gain">Gain Weight</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Daily Water Goal (L)</label><input type="number" id="prof-water-goal" placeholder="2.5" step="0.5" min="1" max="5"></div>
+            <div class="form-group"><label>Daily Steps Goal</label><input type="number" id="prof-steps-goal" placeholder="10000" step="1000" min="1000"></div>
+          </div>
+          <button class="btn-primary" style="margin-top:8px" onclick="saveProfile()">Save Changes</button>
+        </div>
+
+        <div class="profile-card">
+          <div class="panel-title" style="margin-bottom:20px">📊 Your Stats</div>
+          <div class="stat-strip" id="profile-stats"></div>
+
+          <div style="margin-top:28px">
+            <div class="panel-title" style="font-size:14px;margin-bottom:16px">Change Password</div>
+            <div class="form-group"><label>New Password</label><input type="password" id="new-pass" placeholder="Min 8 characters"></div>
+            <div class="form-group"><label>Confirm Password</label><input type="password" id="new-pass2" placeholder="Repeat"></div>
+            <button class="btn-secondary" style="width:100%;margin-top:4px" onclick="changePassword()">Update Password</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────
+         ADVANCED HEALTH
+    ───────────────────────────────────── -->
+    <div class="section" id="section-advanced">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1>Advanced Health 🏥</h1>
+          <p>Detailed vitals &amp; clinical metrics</p>
+        </div>
+        <div class="topbar-right">
+          <button class="btn-add" onclick="openAdvancedModal()">+ Log Advanced</button>
+        </div>
+      </div>
+
+      <!-- Advanced Vitals Cards -->
+      <div class="metrics-grid">
+        <div class="metric-card adv-bp">
+          <div class="metric-icon">🩺</div>
+          <div class="metric-label">Blood Pressure</div>
+          <div class="metric-value"><span id="m-bp">--</span><span class="metric-unit">mmHg</span></div>
+          <div class="metric-sub" id="m-bp-sub">No data yet</div>
+        </div>
+        <div class="metric-card adv-hr">
+          <div class="metric-icon">❤️</div>
+          <div class="metric-label">Heart Rate</div>
+          <div class="metric-value"><span id="m-hr">--</span><span class="metric-unit">bpm</span></div>
+          <div class="metric-sub" id="m-hr-sub">No data yet</div>
+        </div>
+        <div class="metric-card adv-sugar">
+          <div class="metric-icon">🩸</div>
+          <div class="metric-label">Blood Sugar</div>
+          <div class="metric-value"><span id="m-sugar">--</span><span class="metric-unit">mg/dL</span></div>
+          <div class="metric-sub" id="m-sugar-sub">No data yet</div>
+        </div>
+        <div class="metric-card adv-sleep">
+          <div class="metric-icon">😴</div>
+          <div class="metric-label">Sleep</div>
+          <div class="metric-value"><span id="m-sleep">--</span><span class="metric-unit">hrs</span></div>
+          <div class="metric-sub" id="m-sleep-sub">No data yet</div>
+        </div>
+      </div>
+
+      <!-- Nutrition + Activity Row -->
+      <div class="content-row" style="margin-bottom:20px">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">🍽️ Nutrition (Latest Entry)</span></div>
+          <div class="panel-body">
+            <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:0">
+              <div style="text-align:center">
+                <div class="metric-label">Calories</div>
+                <div style="font-family:'Clash Display',sans-serif;font-size:26px;font-weight:600;color:var(--amber)" id="m-calories">--</div>
+                <div style="font-size:11px;color:var(--muted)">kcal</div>
+              </div>
+              <div style="text-align:center">
+                <div class="metric-label">Protein</div>
+                <div style="font-family:'Clash Display',sans-serif;font-size:26px;font-weight:600;color:var(--sage)" id="m-protein">--</div>
+                <div style="font-size:11px;color:var(--muted)">g</div>
+              </div>
+              <div style="text-align:center">
+                <div class="metric-label">Carbs</div>
+                <div style="font-family:'Clash Display',sans-serif;font-size:26px;font-weight:600;color:var(--sky)" id="m-carbs">--</div>
+                <div style="font-size:11px;color:var(--muted)">g</div>
+              </div>
+              <div style="text-align:center">
+                <div class="metric-label">Fat</div>
+                <div style="font-family:'Clash Display',sans-serif;font-size:26px;font-weight:600;color:var(--danger)" id="m-fat">--</div>
+                <div style="font-size:11px;color:var(--muted)">g</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">🏃 Activity (Latest Entry)</span></div>
+          <div class="panel-body" style="text-align:center">
+            <div style="font-size:40px;margin-bottom:8px" id="m-activity-icon">🚶</div>
+            <div style="font-family:'Clash Display',sans-serif;font-size:22px;font-weight:600" id="m-activity-type">--</div>
+            <div style="color:var(--muted);font-size:13px;margin-top:6px" id="m-activity-details">No activity logged</div>
+            <div style="margin-top:12px;padding:10px;background:var(--glass);border-radius:var(--radius-sm)">
+              <span style="font-size:12px;color:var(--muted)">Calories Burned: </span>
+              <span style="font-weight:600;color:var(--sage)" id="m-calories-burned">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced History Table -->
+      <div class="table-panel">
+        <div class="panel-header">
+          <span class="panel-title">Advanced Health History</span>
+          <span id="total-advanced" style="font-size:12px;color:var(--muted)">0 entries</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Date</th><th>BP</th><th>Heart Rate</th><th>Blood Sugar</th><th>Sleep</th><th>Activity</th><th>Calories</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="advanced-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────
+         REPORTS
+    ───────────────────────────────────── -->
+    <div class="section" id="section-reports">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1>Reports 📈</h1>
+          <p>Weekly &amp; monthly health insights</p>
+        </div>
+        <div class="topbar-right">
+          <select id="report-period" onchange="renderReports()">
+            <option value="7">Last 7 Days</option>
+            <option value="30" selected>Last 30 Days</option>
+            <option value="90">Last 90 Days</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Summary Stats -->
+      <div class="metrics-grid" style="margin-bottom:24px">
+        <div class="metric-card weight">
+          <div class="metric-icon">⚖️</div>
+          <div class="metric-label">Avg Weight</div>
+          <div class="metric-value"><span id="rpt-avg-weight">--</span><span class="metric-unit">kg</span></div>
+          <div class="metric-sub" id="rpt-weight-trend">No data</div>
+        </div>
+        <div class="metric-card bmi">
+          <div class="metric-icon">📐</div>
+          <div class="metric-label">Avg BMI</div>
+          <div class="metric-value"><span id="rpt-avg-bmi">--</span></div>
+          <div class="metric-sub" id="rpt-bmi-status">No data</div>
+        </div>
+        <div class="metric-card steps">
+          <div class="metric-icon">👟</div>
+          <div class="metric-label">Avg Steps</div>
+          <div class="metric-value"><span id="rpt-avg-steps">--</span></div>
+          <div class="metric-sub" id="rpt-steps-info">of goal</div>
+        </div>
+        <div class="metric-card water">
+          <div class="metric-icon">💧</div>
+          <div class="metric-label">Avg Water</div>
+          <div class="metric-value"><span id="rpt-avg-water">--</span><span class="metric-unit">L</span></div>
+          <div class="metric-sub" id="rpt-water-info">of goal</div>
+        </div>
+      </div>
+
+      <div class="content-row" style="margin-bottom:20px">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Weight Trend</span></div>
+          <div class="panel-body"><div class="chart-wrap" style="height:200px"><canvas id="rptWeightChart"></canvas></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">BMI Trend</span></div>
+          <div class="panel-body"><div class="chart-wrap" style="height:200px"><canvas id="rptBmiChart"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Steps &amp; Water Progress</span></div>
+        <div class="panel-body"><div class="chart-wrap" style="height:220px"><canvas id="rptStepsChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────
+         HEALTH ALERTS
+    ───────────────────────────────────── -->
+    <div class="section" id="section-alerts">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1>Health Alerts 🔔</h1>
+          <p>Smart warnings &amp; reminders based on your data</p>
+        </div>
+        <div class="topbar-right">
+          <button class="btn-secondary" onclick="dismissAllAlerts()">Dismiss All</button>
+          <button class="btn-add" onclick="checkAlerts(true)">🔄 Refresh</button>
+        </div>
+      </div>
+      <div id="alerts-container">
+        <div class="empty-state">
+          <div class="empty-icon">✅</div>
+          <p>No alerts right now. Keep up the great work!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────
+         ACHIEVEMENTS
+    ───────────────────────────────────── -->
+    <div class="section" id="section-achievements">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1>Achievements 🏆</h1>
+          <p>Your health journey milestones</p>
+        </div>
+      </div>
+
+      <div class="content-row" style="margin-bottom:20px">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">🔥 Daily Streak</span></div>
+          <div class="panel-body" style="text-align:center;padding:32px 24px">
+            <div class="streak-number" id="streak-count">0</div>
+            <div style="font-size:16px;color:var(--muted);margin-top:4px">Day Streak 🔥</div>
+            <div style="font-size:13px;color:var(--ghost);margin-top:10px" id="streak-msg">Start logging daily to build your streak!</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">🎯 Goal Completion</span></div>
+          <div class="panel-body">
+            <div class="goals-list">
+              <div class="goal-item">
+                <div class="goal-top"><span class="goal-name">📊 Total Entries (goal: 30)</span><span class="goal-pct" id="ach-records-pct">0%</span></div>
+                <div class="goal-bar"><div class="goal-fill fill-green" id="ach-records-bar" style="width:0%"></div></div>
+              </div>
+              <div class="goal-item">
+                <div class="goal-top"><span class="goal-name">👟 Days Steps Goal Met</span><span class="goal-pct" id="ach-steps-pct">0%</span></div>
+                <div class="goal-bar"><div class="goal-fill fill-blue" id="ach-steps-bar" style="width:0%"></div></div>
+              </div>
+              <div class="goal-item">
+                <div class="goal-top"><span class="goal-name">💧 Days Water Goal Met</span><span class="goal-pct" id="ach-water-pct">0%</span></div>
+                <div class="goal-bar"><div class="goal-fill fill-amber" id="ach-water-bar" style="width:0%"></div></div>
+              </div>
+              <div class="goal-item">
+                <div class="goal-top"><span class="goal-name">🏥 Advanced Logs (goal: 10)</span><span class="goal-pct" id="ach-adv-pct">0%</span></div>
+                <div class="goal-bar"><div class="goal-fill" id="ach-adv-bar" style="width:0%;background:linear-gradient(90deg,var(--danger),var(--rose))"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">🏅 Achievement Badges</span></div>
+        <div class="panel-body">
+          <div class="badge-grid" id="badge-grid"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODALS
+══════════════════════════════════════ -->
+
+<!-- Log / Edit Health Record Modal -->
+<div class="modal-overlay" id="entry-modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Log Health Entry</div>
+    <div class="modal-sub" id="modal-sub">Record your daily metrics</div>
+    <div class="modal-grid">
+      <div class="form-group"><label>Date</label><input type="date" id="e-date"></div>
+      <div class="form-group"><label>Weight (kg)</label><input type="number" id="e-weight" placeholder="70" step="0.1" min="20" max="300" oninput="calcBMI()"></div>
+      <div class="form-group"><label>Height (cm)</label><input type="number" id="e-height" placeholder="175" min="100" max="250" oninput="calcBMI()"></div>
+      <div class="form-group"><label>BMI (auto)</label><input type="text" id="e-bmi" placeholder="—" readonly style="opacity:0.7;cursor:not-allowed"></div>
+      <div class="form-group"><label>Steps</label><input type="number" id="e-steps" placeholder="8000" min="0"></div>
+      <div class="form-group"><label>Water Intake (L)</label><input type="number" id="e-water" placeholder="2.0" step="0.1" min="0" max="10"></div>
+    </div>
+    <div id="bmi-preview" style="margin-top:12px;padding:12px 14px;background:var(--glass);border-radius:var(--radius-sm);font-size:13px;display:none"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" style="width:auto;padding:11px 28px" onclick="saveEntry()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- Advanced Health Log Modal -->
+<div class="modal-overlay" id="advanced-modal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-title" id="adv-modal-title">Log Advanced Health</div>
+    <div class="modal-sub">Record detailed vitals &amp; health metrics</div>
+
+    <div class="form-group"><label>Date</label><input type="date" id="adv-date"></div>
+
+    <!-- Blood Pressure -->
+    <div class="adv-section">
+      <div class="adv-section-label">🩺 Blood Pressure</div>
+      <div class="modal-grid">
+        <div class="form-group" style="margin-bottom:0"><label>Systolic (mmHg)</label><input type="number" id="adv-systolic" placeholder="120" min="60" max="250" oninput="updateBPStatus()"></div>
+        <div class="form-group" style="margin-bottom:0"><label>Diastolic (mmHg)</label><input type="number" id="adv-diastolic" placeholder="80" min="40" max="150" oninput="updateBPStatus()"></div>
+      </div>
+      <div id="bp-status" style="margin-top:10px;font-size:13px;display:none"></div>
+    </div>
+
+    <!-- Heart Rate & Blood Sugar -->
+    <div class="modal-grid" style="margin-bottom:0">
+      <div class="adv-section">
+        <div class="adv-section-label">❤️ Heart Rate</div>
+        <div class="form-group" style="margin-bottom:0"><label>BPM</label><input type="number" id="adv-hr" placeholder="72" min="30" max="220" oninput="updateHRStatus()"></div>
+        <div id="hr-status" style="margin-top:8px;font-size:12px;display:none"></div>
+      </div>
+      <div class="adv-section">
+        <div class="adv-section-label">🩸 Blood Sugar</div>
+        <div class="form-group"><label>Value (mg/dL)</label><input type="number" id="adv-sugar" placeholder="90" min="20" max="600"></div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Type</label>
+          <select id="adv-sugar-type"><option value="fasting">Fasting</option><option value="after_meal">After Meal</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sleep -->
+    <div class="adv-section">
+      <div class="adv-section-label">😴 Sleep</div>
+      <div class="modal-grid">
+        <div class="form-group" style="margin-bottom:0"><label>Hours Slept</label><input type="number" id="adv-sleep" placeholder="7.5" step="0.5" min="0" max="24"></div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Quality</label>
+          <select id="adv-sleep-quality"><option value="poor">Poor</option><option value="good" selected>Good</option><option value="excellent">Excellent</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nutrition -->
+    <div class="adv-section">
+      <div class="adv-section-label">🍽️ Nutrition</div>
+      <div class="modal-grid">
+        <div class="form-group" style="margin-bottom:0"><label>Calories (kcal)</label><input type="number" id="adv-calories" placeholder="2000" min="0"></div>
+        <div class="form-group" style="margin-bottom:0"><label>Protein (g)</label><input type="number" id="adv-protein" placeholder="60" min="0"></div>
+        <div class="form-group" style="margin-bottom:0;margin-top:12px"><label>Carbs (g)</label><input type="number" id="adv-carbs" placeholder="250" min="0"></div>
+        <div class="form-group" style="margin-bottom:0;margin-top:12px"><label>Fat (g)</label><input type="number" id="adv-fat" placeholder="65" min="0"></div>
+      </div>
+    </div>
+
+    <!-- Activity -->
+    <div class="adv-section">
+      <div class="adv-section-label">🏃 Activity</div>
+      <div class="modal-grid">
+        <div class="form-group" style="margin-bottom:0">
+          <label>Type</label>
+          <select id="adv-activity" onchange="calcCaloriesBurned()">
+            <option value="">None</option>
+            <option value="walking">🚶 Walking</option>
+            <option value="running">🏃 Running</option>
+            <option value="cycling">🚴 Cycling</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0"><label>Duration (minutes)</label><input type="number" id="adv-duration" placeholder="30" min="0" oninput="calcCaloriesBurned()"></div>
+      </div>
+      <div id="calories-burned-preview" style="margin-top:10px;font-size:13px;color:var(--sage);display:none">
+        🔥 Estimated calories burned: <strong id="burned-val">0</strong> kcal
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeAdvancedModal()">Cancel</button>
+      <button class="btn-primary" style="width:auto;padding:11px 28px" onclick="saveAdvanced()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- BMI Calculator Modal -->
+<div class="modal-overlay" id="bmi-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-title">🧮 BMI Calculator</div>
+    <div class="modal-sub">Calculate your Body Mass Index</div>
+    <div class="form-group"><label>Weight (kg)</label><input type="number" id="bc-weight" placeholder="70" oninput="updateBMICalc()"></div>
+    <div class="form-group"><label>Height (cm)</label><input type="number" id="bc-height" placeholder="175" oninput="updateBMICalc()"></div>
+    <div id="bmi-result" style="margin-top:12px;display:none;padding:20px;border-radius:var(--radius-sm);text-align:center">
+      <div style="font-family:'Clash Display',sans-serif;font-size:48px;font-weight:700" id="bc-bmi-val">0</div>
+      <div style="font-size:18px;font-weight:600;margin-top:4px" id="bc-bmi-cat">—</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px" id="bc-bmi-note">—</div>
+    </div>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeBMICalc()">Close</button></div>
+  </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="toast-container" id="toasts"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
